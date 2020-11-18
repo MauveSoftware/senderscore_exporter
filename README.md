@@ -1,5 +1,7 @@
 [![CircleCI](https://circleci.com/gh/MauveSoftware/senderscore_exporter.svg?style=shield)](https://circleci.com/gh/MauveSoftware/senderscore_exporter)
 [![Go Report Card](https://goreportcard.com/badge/github.com/mauvesoftware/senderscore_exporter)](https://goreportcard.com/report/github.com/mauvesoftware/senderscore_exporter)
+[![Docker Build Statu](https://img.shields.io/docker/build/mauvesoftware/senderscore_exporter.svg)](https://hub.docker.com/r/mauvesoftware/senderscore_exporter/builds)
+
 
 # senderscore_exporter
 Metrics exporter for senderscore.org scores to prometheus

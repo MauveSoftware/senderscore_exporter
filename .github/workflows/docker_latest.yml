@@ -7,7 +7,7 @@ on:
 
 name: Docker Build (latest)
 jobs:
-  build:
+  build_docker_latest:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 

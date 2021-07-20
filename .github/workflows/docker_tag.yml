@@ -5,7 +5,7 @@ on:
 
 name: Docker Build (tag)
 jobs:
-  build:
+  build_docker_tag:
     runs-on: ubuntu-latest
 
     steps:

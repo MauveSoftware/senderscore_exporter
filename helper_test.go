@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: (c) Mauve Mailorder Software GmbH & Co. KG, 2020. Licensed under MIT license.
+//
+// SPDX-License-Identifier: MIT
+
 package main
 
 import (

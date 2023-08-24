@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	scoreDesc = prometheus.NewDesc("senderscore_score", "senderscore.org score of the IP address", []string{"ip"}, nil)
+	scoreDesc = prometheus.NewDesc("senderscore_score", "senderscore.org score of the IP address", []string{"ip", "ptr"}, nil)
 )
 
 type collector struct {

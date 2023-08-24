@@ -56,15 +56,24 @@ func collectForIP(ip net.IP, ch chan<- prometheus.Metric) error {
 
 	ips, err := net.LookupIP(host)
 	if err != nil {
-		return errors.Wrapf(err, "could not get score for %s", ip)
+			return errors.Wrapf(err, "could not get score for %s", ip)
 	}
 
 	if len(ips) == 0 {
-		return nil
+			return nil
+	}
+
+	// Lookup PTR record
+	names, err := net.LookupAddr(ip.String())
+	ptr := ""
+	if err == nil && len(names) > 0 {
+			ptr = names[0]
 	}
 
 	resolvedIP := ips[0].To4()
 	score := resolvedIP[3]
-	ch <- prometheus.MustNewConstMetric(scoreDesc, prometheus.GaugeValue, float64(score), ip.String())
+
+	// Always add IP as label, add PTR record as additional label if it resolves
+	ch <- prometheus.MustNewConstMetric(scoreDesc, prometheus.GaugeValue, float64(score), ip.String(), ptr)
 	return nil
 }

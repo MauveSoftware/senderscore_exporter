@@ -38,7 +38,7 @@ func resolverFromConfig(cfg *Config) *net.Resolver {
 	dnsServer := fmt.Sprintf("%s:53", cfg.DNSServer)
 
 	return &net.Resolver{
-		PreferGo: true, // Forces the Go resolver to be used
+		PreferGo: true,
 		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
 			d := net.Dialer{
 				Timeout: time.Duration(5) * time.Second,
@@ -75,7 +75,7 @@ func (c *collector) Collect(ch chan<- prometheus.Metric) {
 func (c *collector) collectForIP(ctx context.Context, ip net.IP, ch chan<- prometheus.Metric) error {
 	host := reverseIP(ip) + "score.senderscore.com"
 
-	ips, err := c.resolver.LookupIP(ctx, "ip4", host)
+	ips, err := c.resolver.LookupIP(ctx, networkForIP(ip), host)
 	if err != nil {
 		return errors.Wrapf(err, "could not get score for %s", ip)
 	}

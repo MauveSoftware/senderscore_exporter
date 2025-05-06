@@ -52,3 +52,11 @@ func revserseBlock(b []uint8) string {
 
 	return s
 }
+
+func networkForIP(ip net.IP) string {
+	if ip.To4() != nil {
+		return "ip4"
+	}
+
+	return "ip6"
+}

@@ -32,12 +32,9 @@ func reverseIPv6(ip net.IP) string {
 	s := ""
 
 	a := make([]uint8, 16)
-	for i, v := range ip {
-		a[i] = v
-	}
-	fmt.Println(a)
+	copy(a, ip)
 
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		idx := 14 - (2 * i)
 		s += revserseBlock(ip[idx : idx+2])
 	}

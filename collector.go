@@ -5,25 +5,46 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	scoreDesc = prometheus.NewDesc("senderscore_score", "senderscore.org score of the IP address", []string{"ip", "ptr"}, nil)
-)
+var scoreDesc = prometheus.NewDesc("senderscore_score", "senderscore.org score of the IP address", []string{"ip", "ptr"}, nil)
 
 type collector struct {
-	cfg *Config
+	cfg      *Config
+	resolver *net.Resolver
 }
 
 func newCollector(cfg *Config) *collector {
 	return &collector{
-		cfg: cfg,
+		cfg:      cfg,
+		resolver: resolverFromConfig(cfg),
+	}
+}
+
+func resolverFromConfig(cfg *Config) *net.Resolver {
+	if cfg.DNSServer == "" {
+		return net.DefaultResolver
+	}
+
+	dnsServer := fmt.Sprintf("%s:53", cfg.DNSServer)
+
+	return &net.Resolver{
+		PreferGo: true, // Forces the Go resolver to be used
+		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+			d := net.Dialer{
+				Timeout: time.Duration(5) * time.Second,
+			}
+			return d.DialContext(ctx, network, dnsServer)
+		},
 	}
 }
 
@@ -39,7 +60,7 @@ func (c *collector) Collect(ch chan<- prometheus.Metric) {
 
 	for _, addr := range c.cfg.Addresses {
 		go func(a net.IP) {
-			err := collectForIP(a, ch)
+			err := c.collectForIP(context.Background(), a, ch)
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -51,23 +72,23 @@ func (c *collector) Collect(ch chan<- prometheus.Metric) {
 	wg.Wait()
 }
 
-func collectForIP(ip net.IP, ch chan<- prometheus.Metric) error {
+func (c *collector) collectForIP(ctx context.Context, ip net.IP, ch chan<- prometheus.Metric) error {
 	host := reverseIP(ip) + "score.senderscore.com"
 
-	ips, err := net.LookupIP(host)
+	ips, err := c.resolver.LookupIP(ctx, "ip4", host)
 	if err != nil {
-			return errors.Wrapf(err, "could not get score for %s", ip)
+		return errors.Wrapf(err, "could not get score for %s", ip)
 	}
 
 	if len(ips) == 0 {
-			return nil
+		return nil
 	}
 
 	// Lookup PTR record
-	names, err := net.LookupAddr(ip.String())
+	names, err := c.resolver.LookupAddr(ctx, ip.String())
 	ptr := ""
 	if err == nil && len(names) > 0 {
-			ptr = names[0]
+		ptr = names[0]
 	}
 
 	resolvedIP := ips[0].To4()

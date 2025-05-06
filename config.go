@@ -5,8 +5,8 @@
 package main
 
 import (
-	"io/ioutil"
 	"net"
+	"os"
 
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -16,10 +16,11 @@ import (
 type Config struct {
 	// Addresses is the list of IP addresses monitored
 	Addresses []net.IP `yaml:"addresses"`
+	DNSServer string   `yaml:"dns_server"`
 }
 
 func loadConfigFromFile(path string) (*Config, error) {
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not open config file")
 	}
